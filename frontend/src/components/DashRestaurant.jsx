@@ -33,7 +33,7 @@ export default function DashRestaurant() {
   };
 
   return (
-    <div className="overflow-x-auto mx-auto w-full mr-2 mt-6 ml-2">
+    <div className="overflow-x-auto mx-auto w-full mr-2 mt-6 ml-2 mb-6">
       <div className="mb-5 ml-1">
         <Link to="/create-restaurant">
           <Button outline>
