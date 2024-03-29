@@ -39,9 +39,15 @@ export default function Restaurants() {
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        {restaurants.map((restaurant) => (
-          <RestaurantCard key={restaurant._id} restaurant={restaurant} />
-        ))}
+        {restaurants.length > 0 ? (
+          restaurants.map((restaurant) => (
+            <RestaurantCard key={restaurant._id} restaurant={restaurant} />
+          ))
+        ) : (
+          <div className="col-span-2 text-center">
+            No matching restaurants found.
+          </div>
+        )}
       </div>
     </div>
   );

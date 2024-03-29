@@ -38,9 +38,15 @@ export default function Packages() {
         </form>
       </div>
       <div className="grid grid-cols-2 gap-4">
-        {packages.map((pkg) => (
-          <PackagesCard key={pkg._id} packageData={pkg} />
-        ))}
+        {packages.length > 0 ? (
+          packages.map((pkg) => (
+            <PackagesCard key={pkg._id} packageData={pkg} />
+          ))
+        ) : (
+          <div className="col-span-2 text-center">
+            No matching packages found.
+          </div>
+        )}
       </div>
     </div>
   );

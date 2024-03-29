@@ -1,5 +1,7 @@
 import { Button, Card } from "flowbite-react";
 import { Link } from "react-router-dom";
+import { FaStar } from "react-icons/fa6";
+import { FaRegStar } from "react-icons/fa6";
 
 export default function PackagesCard({ packageData }) {
   return (
@@ -8,12 +10,20 @@ export default function PackagesCard({ packageData }) {
         {packageData.packageName}
       </h5>
       <p>
-        <b>Price of per night: </b> Rs.{packageData.packagePrice}
+        <b>Price: </b> Rs.{packageData.packagePrice}
       </p>
 
       <p className="font-normal text-gray-700 dark:text-gray-400">
         {packageData.packageDetails}
       </p>
+
+      <div className="flex">
+        <FaStar />
+        <FaStar />
+        <FaStar />
+        <FaStar />
+        <FaRegStar />
+      </div>
 
       <Link to={`/booking-package/${packageData._id}`}>
         <Button color="dark">Book Now</Button>

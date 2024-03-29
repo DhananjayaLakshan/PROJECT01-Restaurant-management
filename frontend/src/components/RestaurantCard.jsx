@@ -1,4 +1,7 @@
 import { Card } from "flowbite-react";
+import { FaStar } from "react-icons/fa6";
+import { FaRegStar } from "react-icons/fa6";
+
 export default function RestaurantCard({ restaurant }) {
   return (
     <Card className="max-w-sm" imgSrc={restaurant.image} horizontal>
@@ -16,6 +19,14 @@ export default function RestaurantCard({ restaurant }) {
       <p className="font-normal text-gray-700 dark:text-gray-400">
         {restaurant.description}
       </p>
+
+      <div className="flex">
+        <FaStar />
+        <FaStar />
+        <FaStar />
+        <FaStar />
+        <FaRegStar />
+      </div>
     </Card>
   );
 }

@@ -3,12 +3,15 @@ import { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import axios from "axios";
 import JsPDF from "jspdf";
+import backgroundImage from "../image/bg.jpg";
 
 export default function Booking() {
   const { id } = useParams();
   const [formData, setFormData] = useState({
-    checkInDate: "",
-    checkOutDate: "",
+    Date: "",
+    Time: "",
+    Discount: "0",
+    Quantity: "1",
   });
   const [packageData, setPackageData] = useState({});
   const [TotalBill, setTotalBill] = useState(0);
@@ -18,7 +21,13 @@ export default function Booking() {
       try {
         const { data } = await axios.get(`/api/package?packageId=${id}`);
         setPackageData(data[0]);
-        setTotalBill(data[0].packagePrice);
+        // Initial calculation of TotalBill should consider the default Quantity and Discount
+        const initialTotalBill = calculateTotalBill(
+          data[0].packagePrice,
+          formData.Quantity,
+          formData.Discount
+        );
+        setTotalBill(initialTotalBill);
       } catch (error) {
         console.error(error);
       }
@@ -28,17 +37,26 @@ export default function Booking() {
   }, [id]);
 
   useEffect(() => {
-    if (formData.checkInDate && formData.checkOutDate) {
-      const checkInDate = new Date(formData.checkInDate);
-      const checkOutDate = new Date(formData.checkOutDate);
-      const diffTime = Math.abs(checkOutDate - checkInDate);
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      setTotalBill((diffDays - 1) * packageData.packagePrice);
-    }
-  }, [formData.checkInDate, formData.checkOutDate, packageData.packagePrice]);
+    // Calculate the total bill based on quantity and discount
+    const updatedTotalBill = calculateTotalBill(
+      packageData.packagePrice,
+      formData.Quantity,
+      formData.Discount
+    );
+    setTotalBill(updatedTotalBill);
+  }, [formData, packageData]);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.id]: e.target.value });
+    const { id, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [id]: value,
+    }));
+  };
+
+  const calculateTotalBill = (price, quantity, discount) => {
+    const priceAfterDiscount = price * quantity * (1 - discount / 100);
+    return priceAfterDiscount.toFixed(2); // Rounds to two decimal places
   };
 
   const generatePDF = () => {
@@ -49,90 +67,122 @@ export default function Booking() {
 
     pdf.setFontSize(16);
     pdf.text(`Package Name: ${packageData.packageName}`, 20, 40);
-    pdf.text(`Price Per Night: Rs.${packageData.packagePrice}`, 20, 50);
-    pdf.text(`Check-In Date: ${formData.checkInDate}`, 20, 60);
-    pdf.text(`Check-Out Date: ${formData.checkOutDate}`, 20, 70);
-    pdf.text(`Total Bill: Rs.${TotalBill}`, 20, 80);
+    pdf.text(`Price: Rs.${packageData.packagePrice}`, 20, 50);
+    pdf.text(`Item: ${packageData.packageDetails}`, 20, 60);
+    pdf.text(`Quantity: ${formData.Quantity}`, 20, 70);
+    pdf.text(`Date: ${formData.Date}`, 20, 80);
+    pdf.text(`Time: ${formData.Time}`, 20, 90);
+
+    pdf.text(`--------------------------------------`, 20, 100);
+
+    pdf.text(`Discount: ${formData.Discount}%`, 20, 110);
+    pdf.text(`Total Bill: Rs.${TotalBill}`, 20, 120);
 
     pdf.save("booking-confirmation.pdf");
   };
 
   return (
-    <div className="p-3 max-w-3xl mx-auto min-h-screen">
-      <form className="flex flex-col gap-4 bg-white p-5">
-        <h1 className="text-center text-3xl my-7 font-semibold">
-          Package Booking
-        </h1>
+    <div
+      style={{
+        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${backgroundImage})`,
+        backgroundSize: "cover",
+        minHeight: "100vh",
+      }}
+    >
+      <div className="p-3 max-w-3xl mx-auto min-h-screen">
+        <form className="flex flex-col gap-4 bg-white p-5">
+          <h1 className="text-center text-3xl my-7 font-semibold">
+            Package Booking
+          </h1>
 
-        <div className="flex flex-col gap-4 sm:flex-row justify-between mt-5">
-          <Label value="Package Name" />
+          <div className="flex flex-col gap-4 sm:flex-row justify-between mt-5">
+            <Label value="Package Name" />
+            <TextInput
+              type="text"
+              required
+              id="packageName"
+              className="flex-1"
+              value={packageData.packageName || ""}
+              disabled
+            />
+
+            <Label value="Price" />
+            <TextInput
+              type="text"
+              required
+              id="packagePrice"
+              className="flex-1"
+              value={"Rs." + packageData.packagePrice}
+              disabled
+            />
+          </div>
+
+          <div className="flex flex-col gap-4 sm:flex-row justify-between mt-5">
+            <Label value="Date" />
+            <TextInput
+              type="date"
+              required
+              id="Date"
+              className="flex-1"
+              value={formData.Date}
+              onChange={handleChange}
+            />
+
+            <Label value="Time" />
+            <TextInput
+              type="time"
+              required
+              id="Time"
+              className="flex-1"
+              value={formData.Time}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className="flex flex-col gap-4 sm:flex-row justify-between mt-5">
+            <Label value="Quantity" />
+            <TextInput
+              type="number"
+              id="Quantity"
+              className="flex-1"
+              // value={formData.Quantity}
+              onChange={handleChange}
+            />
+            <Label value="Discount" />
+            <TextInput
+              type="number"
+              id="Discount"
+              className="flex-1"
+              // value={formData.Discount}
+              onChange={handleChange}
+            />
+          </div>
+          <Label value="Total Bill Amount" />
           <TextInput
             type="text"
             required
-            id="packageName"
+            id="totalBill"
             className="flex-1"
-            value={packageData.packageName || ""}
+            value={"Rs." + TotalBill}
             disabled
           />
 
-          <Label value="Price" />
-          <TextInput
-            type="text"
-            required
-            id="packagePrice"
-            className="flex-1"
-            value={"Rs." + packageData.packagePrice}
-            disabled
-          />
-        </div>
-
-        <div className="flex flex-col gap-4 sm:flex-row justify-between mt-5">
-          <Label value="Checkin Date" />
-          <TextInput
-            type="date"
-            required
-            id="checkInDate"
-            className="flex-1"
-            value={formData.checkInDate}
-            onChange={handleChange}
-          />
-
-          <Label value="Checkout Date" />
-          <TextInput
-            type="date"
-            required
-            id="checkOutDate"
-            className="flex-1"
-            value={formData.checkOutDate}
-            onChange={handleChange}
-          />
-        </div>
-
-        <Label value="Total Bill Amount" />
-        <TextInput
-          type="text"
-          required
-          id="totalBill"
-          className="flex-1"
-          value={"Rs." + TotalBill}
-          disabled
-        />
-
-        <div className="flex justify-between">
-          <div>
-            <Link to="/packages">
-              <Button type="button" color="dark">
-                Back
+          <div className="flex justify-between">
+            <div>
+              <Link to="/packages">
+                <Button type="button" color="dark">
+                  Back
+                </Button>
+              </Link>
+            </div>
+            <div>
+              <Button type="submit" color="blue" onClick={generatePDF}>
+                Book
               </Button>
-            </Link>
+            </div>
           </div>
-          <div>
-            <Button type="submit" color="blue" onClick={generatePDF}>
-              Book
-            </Button>
-          </div>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   );
 }

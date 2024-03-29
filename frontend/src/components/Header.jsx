@@ -30,7 +30,7 @@ export default function Header() {
 
       <div className="flex gap-2 md:order-2">
         <span className="block text-sm font-medium truncate mr-2 mt-2">
-          userName
+          Traveller
         </span>
 
         <Dropdown
