@@ -3,6 +3,7 @@ import { Button, Table } from "flowbite-react";
 import { useEffect, useState } from "react";
 import { IoIosAddCircleOutline } from "react-icons/io";
 import { Link } from "react-router-dom";
+import Swal from "sweetalert2";
 
 export default function DashPackage() {
   const [packages, setPackages] = useState([]);
@@ -21,14 +22,24 @@ export default function DashPackage() {
   }, []);
 
   const handleDelete = async (id) => {
-    try {
-      const res = await axios.delete(`/api/package/${id}`);
-      setPackages((currentPackages) =>
-        currentPackages.filter((p) => p._id !== id)
-      );
-      console.log(res);
-    } catch (error) {
-      console.error(error);
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "Do you want to delete this course?",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Yes, delete it",
+      cancelButtonText: "No, keep it",
+    });
+    if (result.isConfirmed) {
+      try {
+        const res = await axios.delete(`/api/package/${id}`);
+        setPackages((currentPackages) =>
+          currentPackages.filter((p) => p._id !== id)
+        );
+        console.log(res);
+      } catch (error) {
+        console.error(error);
+      }
     }
   };
 

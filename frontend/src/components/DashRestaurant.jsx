@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { IoIosAddCircleOutline } from "react-icons/io";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import Swal from "sweetalert2";
 
 export default function DashRestaurant() {
   const [restaurants, setRestaurants] = useState([]); // Renamed to restaurants for clarity
@@ -21,14 +22,25 @@ export default function DashRestaurant() {
   }, []);
 
   const handleDelete = async (id) => {
-    try {
-      const res = await axios.delete(`/api/restaurant/${id}`);
-      setRestaurants((currentRestaurants) =>
-        currentRestaurants.filter((p) => p._id !== id)
-      );
-      console.log(res);
-    } catch (error) {
-      console.error(error);
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "Do you want to delete this course?",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Yes, delete it",
+      cancelButtonText: "No, keep it",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const res = await axios.delete(`/api/restaurant/${id}`);
+        setRestaurants((currentRestaurants) =>
+          currentRestaurants.filter((p) => p._id !== id)
+        );
+        console.log(res);
+      } catch (error) {
+        console.error(error);
+      }
     }
   };
 

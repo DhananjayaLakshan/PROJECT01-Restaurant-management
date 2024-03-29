@@ -2,6 +2,8 @@ import { Button, TextInput } from "flowbite-react";
 import { useEffect, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function UpdatePackage() {
   const { id } = useParams();
@@ -21,7 +23,6 @@ export default function UpdatePackage() {
 
     fetchPackages();
   }, [id]);
-  console.log(formData);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -31,8 +32,28 @@ export default function UpdatePackage() {
     e.preventDefault();
     try {
       const res = await axios.put(`/api/package/${id}`, formData);
-      console.log("Response:", res);
+
+      toast.success(res.data.message, {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
     } catch (error) {
+      toast.error("Update failed. Please try again.", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
       console.error(error);
     }
   };
@@ -102,6 +123,7 @@ export default function UpdatePackage() {
           </div>
         </div>
       </form>
+      <ToastContainer />
     </div>
   );
 }

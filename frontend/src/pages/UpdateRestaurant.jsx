@@ -2,6 +2,8 @@ import { Button, TextInput } from "flowbite-react";
 import { useEffect, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function UpdateRestaurant() {
   const { id } = useParams();
@@ -13,7 +15,6 @@ export default function UpdateRestaurant() {
       try {
         const { data } = await axios.get(`/api/restaurant?restaurantId=${id}`);
         setFormData(data[0]);
-        // navigate("/dashboard?tab=restaurant");
       } catch (error) {
         console.error(error);
       }
@@ -31,8 +32,27 @@ export default function UpdateRestaurant() {
 
     try {
       const res = await axios.put(`/api/restaurant/${id}`, formData);
-      console.log("Response:", res);
+      toast.success("Updated successfully", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
     } catch (error) {
+      toast.error("Update failed. Please try again.", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
       console.error(error);
     }
   };
@@ -113,6 +133,7 @@ export default function UpdateRestaurant() {
           </div>
         </div>
       </form>
+      <ToastContainer />
     </div>
   );
 }
