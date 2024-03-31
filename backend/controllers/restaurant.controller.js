@@ -1,56 +1,72 @@
-const Restaurant = require('../models/restaurant.model')
-const errorHandler = require('../utils/error')
+// Importing the necessary modules
+const Restaurant = require('../models/restaurant.model'); // Model for Restaurant data schema
+const errorHandler = require('../utils/error'); // Utility for handling errors
 
+// Function to create a new restaurant entry
 const createRestaurant = async (req, res, next) => {
     try {
-        const { ownerName, restaurantName, location, description, image } = req.body
+        // Extracting restaurant data from the request body
+        const { ownerName, restaurantName, location, description, image } = req.body;
 
+        // Validating required fields
         if (!ownerName || !restaurantName || !location) {
-            return next(errorHandler(400, 'Please fill out all the fields'))
+            return next(errorHandler(400, 'Please fill out all the fields'));
         }
 
+        // Creating a new Restaurant instance with provided data
         const newRestaurant = await Restaurant({
             ownerName,
             restaurantName,
             location,
             description,
             image
-        })
+        });
 
-        const savedRestaurant = await newRestaurant.save()
+        // Saving the new restaurant to the database
+        const savedRestaurant = await newRestaurant.save();
 
-        res.status(201).json({ message: 'Restaurant created', savedRestaurant })
-
+        // Sending a success response with the saved restaurant data
+        res.status(201).json({ message: 'Restaurant created', savedRestaurant });
     } catch (error) {
-        next(error)
+        // Forwarding the error to the error handling middleware
+        next(error);
     }
-}
+};
 
+// Function to retrieve restaurants based on query parameters
 const getRestaurant = async (req, res, next) => {
     try {
-        const sortDirection = req.query.order === 'asc' ? 1 : -1
+        // Determining sort direction from the query parameter
+        const sortDirection = req.query.order === 'asc' ? 1 : -1;
 
-        const query = {}
+        const query = {};
 
+        // Filtering by restaurant name or ID if provided in the query
         if (req.query.restaurantName) {
-            query.restaurantName = req.query.restaurantName
+            query.restaurantName = req.query.restaurantName;
         }
         if (req.query.restaurantId) {
-            query._id = req.query.restaurantId
+            query._id = req.query.restaurantId;
         }
 
-        const restaurant = await Restaurant.find(query).sort({ updatedAt: sortDirection })
-        res.status(200).json(restaurant)
+        // Finding and sorting restaurants based on the query and sort direction
+        const restaurant = await Restaurant.find(query).sort({ updatedAt: sortDirection });
 
+        // Sending the found restaurants in the response
+        res.status(200).json(restaurant);
     } catch (error) {
-        next(error)
+        // Forwarding the error to the error handling middleware
+        next(error);
     }
-}
+};
 
+// Function to update an existing restaurant's information
 const updateRestaurant = async (req, res, next) => {
     try {
-        const { ownerName, restaurantName, location, description, image } = req.body
+        // Extracting updated data from the request body
+        const { ownerName, restaurantName, location, description, image } = req.body;
 
+        // Updating the restaurant identified by req.params.id with the new data
         const updatedRestaurant = await Restaurant.findByIdAndUpdate(req.params.id, {
             $set: {
                 ownerName,
@@ -59,24 +75,29 @@ const updateRestaurant = async (req, res, next) => {
                 description,
                 image
             }
-        }, { new: true })
+        }, { new: true }); // Option to return the updated document
 
-        res.status(200).json({ message: 'updated successfully', updatedRestaurant })
+        // Sending a success response with the updated restaurant data
+        res.status(200).json({ message: 'updated successfully', updatedRestaurant });
     } catch (error) {
-        next(error)
+        // Forwarding the error to the error handling middleware
+        next(error);
     }
-}
+};
 
+// Function to delete a restaurant by its ID
 const deleteRestaurant = async (req, res, next) => {
     try {
+        // Deleting the restaurant identified by req.params.id
+        await Restaurant.findByIdAndDelete(req.params.id);
 
-        await Restaurant.findByIdAndDelete(req.params.id)
-
-        res.status(200).json({ message: 'restaurant has been deleted' })
-
+        // Sending a success response indicating the restaurant has been deleted
+        res.status(200).json({ message: 'restaurant has been deleted' });
     } catch (error) {
-        next(error)
+        // Forwarding the error to the error handling middleware
+        next(error);
     }
-}
+};
 
-module.exports = { createRestaurant, getRestaurant, updateRestaurant, deleteRestaurant }
+// Exporting the functions to be used in the application routes
+module.exports = { createRestaurant, getRestaurant, updateRestaurant, deleteRestaurant };
